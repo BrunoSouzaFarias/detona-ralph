@@ -13,6 +13,7 @@ const state = {
         result: 0,
         currentTime: 60,
         lives: 3,
+        highScores: [],
        
     },
     actions: {
@@ -20,6 +21,27 @@ const state = {
         
     },
 };
+
+const difficultyLevels = {
+    easy: {
+        gameVelocity: 1500,
+        currentTime: 90,
+    },
+    medium: {
+        gameVelocity: 1000,
+        currentTime: 60,
+    },
+    hard: {
+        gameVelocity: 800,
+        currentTime: 45,
+    },
+};
+
+function chooseDifficulty(level) {
+    state.Values.gameVelocity = difficultyLevels[level].gameVelocity;
+    state.Values.currentTime = difficultyLevels[level].currentTime;
+    
+}
 
 function countDown (){
     state.Values.currentTime--;
@@ -59,7 +81,7 @@ function addListenerHitbox() {
                 state.Values.result++;
                 state.view.score.textContent = state.Values.result;
                 state.Values.hitPosition = null;
-                playSound();
+                playSond();
             } else {
                decreaseLife();
             }
@@ -78,9 +100,37 @@ function decreaseLife(){
 }
 
 
+function saveHighScores() {
+    localStorage.setItem('highScores', JSON.stringify(state.Values.highScores));
+}
+
+function loadHighScores() {
+    const highScores = JSON.parse(localStorage.getItem('highScores'));
+    if (highScores) {
+        state.Values.highScores = highScores;
+    }
+}
+
+
+function addHighScore(score) {
+    state.Values.highScores.push(score);
+    state.Values.highScores.sort((a, b) => b - a); 
+    state.Values.highScores = state.Values.highScores.slice(0, 10);
+    saveHighScores();
+}
+
+const startGameButton = document.getElementById('start-game-button');
+
+startGameButton.addEventListener('click', () => {
+  
+    chooseDifficulty('easy');
+    moveEnemy(); 
+    startGameButton.style.display = 'none';
+});
 
 function init() {}
 moveEnemy();
 addListenerHitbox();
-
+saveHighScores();
+loadHighScores();
 init();
